@@ -243,11 +243,12 @@ function captions(t) {
   return g(SAFE.cx, CAPTION_Y, 0.92 + 0.08 * k, `<text x="0" y="0" font-size="${fs.toFixed(1)}" font-weight="800" text-anchor="middle" fill="${C.white}" stroke="${C.ink}" stroke-width="${(fs * 0.22).toFixed(1)}" paint-order="stroke" stroke-linejoin="round">${cur[2]}</text>`, `opacity="${k}"`);
 }
 
+const BG_RECT = `<rect width="${W}" height="${H}" fill="${window.BG || '#000'}"/>`;   // also the split point drawWarped looks for
 const DEFS_BASE = `<defs>
   <filter id="bigBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
   <filter id="glowE" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 </defs>`;
-window.svgAt = t => { WARPN = []; return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><style>text{font-family:${FONT}}</style>${DEFS_BASE}${typeof DEFS === 'string' ? DEFS : ''}<rect width="${W}" height="${H}" fill="${window.BG || '#000'}"/>${frame(t)}${captions(t)}${typeof OVERLAY === 'function' ? OVERLAY(t) : ''}</svg>`; };
+window.svgAt = t => { WARPN = []; return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><style>text{font-family:${FONT}}</style>${DEFS_BASE}${typeof DEFS === 'string' ? DEFS : ''}${BG_RECT}${frame(t)}${captions(t)}${typeof OVERLAY === 'function' ? OVERLAY(t) : ''}</svg>`; };
 window.renderAt = t => { window.T_BASE = undefined; document.getElementById('root').innerHTML = svgAt(t); };
 // each output frame = K subframes across a 180-degree shutter, rasterised from the same SVG and accumulated in the WebGL2
 // compositor, then bloom / CA / vignette / grain in the final shader. POST overrides any of them (bloom 0 for paper-white scenes).
@@ -350,7 +351,7 @@ async function drawKids(kids, ctx, view, depth) {
   }
 }
 async function drawWarped(svg, ctx) {
-  const open = svg.match(/^<svg[^>]*>/)[0], bi = svg.indexOf(`<rect width="${W}" height="${H}" fill="#000"/>`);
+  const open = svg.match(/^<svg[^>]*>/)[0], bi = svg.indexOf(BG_RECT);
   SVG_HEAD = svg.slice(open.length, bi);
   await drawKids(warpTree(svg.slice(bi, -'</svg>'.length)).kids, ctx, { x0: 0, y0: 0, w: W, h: H, sc: 1 }, 0);
 }

@@ -10,6 +10,13 @@ The 8-second demo above is [`examples/demo`](examples/demo) ([video](examples/de
 typewriter title, a whip pan, a tracking shot over a count-up, a zoom through a ring, an orbit around a card that keystones
 in perspective, a glitch cut and a pop-in with particles. All of it is named in [`project.json`](examples/demo/project.json).
 
+![showreel frames](docs/showreel-frames.png)
+
+The 18-second [showreel](examples/showreel) ([video](examples/showreel/showreel.mp4)) is a fuller piece: six scenes cut on a
+120 BPM beat, a zoom through the full stop of the headline, paper layers at dusk, a chart of the soundtrack's own measured
+loudness and beats ([`data.py`](examples/showreel/data.py)), six element fx at once, and the scene's own spec typed on an
+orbiting card. Its music was generated with Google Lyria; everything else, sound effects included, is code in that folder.
+
 ## Why
 
 - **Named vocabulary.** `"cam": {"move": "orbit"}`, `"cut": "whip pan"`, `"fx": [{"fx": "count-up", "target": "num"}]`.

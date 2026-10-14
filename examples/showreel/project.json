@@ -1,0 +1,222 @@
+{
+ "name": "showreel",
+ "w": 1080,
+ "h": 1350,
+ "fps": 30,
+ "dur": 18,
+ "music": "music.mp3",
+ "cuts": [
+  2.413,
+  5.408,
+  8.404,
+  11.399,
+  14.394
+ ],
+ "scenes": [
+  {
+   "cam": {
+    "move": "dolly in",
+    "amount": 0.07,
+    "subject": "dot",
+    "ease": "inOut"
+   },
+   "fx": [
+    {
+     "fx": "pop-in",
+     "target": "dot",
+     "at": 1.6,
+     "strength": "strong"
+    }
+   ],
+   "cut": {
+    "name": "zoom through",
+    "into": "dot",
+    "dur": 0.7
+   }
+  },
+  {
+   "cam": [
+    {
+     "move": "crane up",
+     "amount": 0.7,
+     "ease": "inOut"
+    },
+    {
+     "move": "tracking shot",
+     "dir": "left",
+     "amount": 1.1,
+     "ease": "inOut"
+    }
+   ],
+   "cut": {
+    "name": "match cut",
+    "match": [
+     "sun",
+     "badge"
+    ]
+   }
+  },
+  {
+   "cam": {
+    "move": "orbit",
+    "amount": 18,
+    "subject": "card",
+    "ease": "inOut"
+   },
+   "fx": [
+    {
+     "fx": "line draw",
+     "target": "env",
+     "at": 0.15,
+     "dur": 1.3
+    },
+    {
+     "fx": "stagger",
+     "target": "ticks",
+     "n": 16,
+     "gap": 0.05,
+     "of": "grow",
+     "at": 0.5
+    },
+    {
+     "fx": "count-up",
+     "target": "badge",
+     "from": 0,
+     "to": 120,
+     "dur": 1.0,
+     "at": 0.3
+    }
+   ],
+   "cut": {
+    "name": "whip pan",
+    "dir": "left"
+   }
+  },
+  {
+   "cam": {
+    "move": "dolly in",
+    "amount": 0.07,
+    "ease": "out"
+   },
+   "fx": [
+    {
+     "fx": "stagger",
+     "target": "tiles",
+     "n": 6,
+     "gap": 0.1,
+     "of": "pop",
+     "at": 0.0
+    },
+    {
+     "fx": "pop-in",
+     "target": "c1",
+     "at": 0.7,
+     "strength": "strong"
+    },
+    {
+     "fx": "shape morph",
+     "target": "c2",
+     "shapes": [
+      "circle",
+      "triangle",
+      "star",
+      "heart"
+     ],
+     "dur": 2.0,
+     "at": 0.5,
+     "spin": 40
+    },
+    {
+     "fx": "typewriter",
+     "target": "c3",
+     "text": "hello",
+     "cps": 7,
+     "at": 0.7
+    },
+    {
+     "fx": "count-up",
+     "target": "c4",
+     "from": 0,
+     "to": 99,
+     "dur": 1.6,
+     "at": 0.7
+    },
+    {
+     "fx": "line draw",
+     "target": "c5",
+     "at": 0.7,
+     "dur": 1.4
+    },
+    {
+     "fx": "particles",
+     "target": "c6",
+     "at": 1.0,
+     "count": 10,
+     "size": 30,
+     "colors": [
+      "#d9730d",
+      "#161513",
+      "#b9b2a3"
+     ],
+     "outline": "#161513"
+    }
+   ],
+   "cut": {
+    "name": "flip",
+    "backdrop": "#e2dccf"
+   }
+  },
+  {
+   "cam": {
+    "move": "orbit",
+    "amount": 30,
+    "subject": "card",
+    "ease": "inOut"
+   },
+   "fx": [
+    {
+     "fx": "typewriter",
+     "target": "json",
+     "text": "{\n  \"cam\": { \"move\": \"orbit\", \"subject\": \"card\" },\n  \"fx\": [{ \"fx\": \"typewriter\", \"target\": \"json\" }],\n  \"cut\": \"smash cut\"\n}",
+     "cps": 75,
+     "at": 0.25
+    }
+   ],
+   "cut": "smash cut"
+  },
+  {
+   "cam": {
+    "move": "dolly in",
+    "amount": 0.07,
+    "subject": "title",
+    "ease": "out"
+   },
+   "fx": [
+    {
+     "fx": "pop-in",
+     "target": "title",
+     "at": 0.0,
+     "strength": "strong"
+    },
+    {
+     "fx": "particles",
+     "target": "title",
+     "at": 0.04,
+     "colors": [
+      "#d9730d",
+      "#161513",
+      "#b9b2a3"
+     ],
+     "outline": "#161513"
+    },
+    {
+     "fx": "typewriter",
+     "target": "url",
+     "text": "github.com/WolfurX/reel-engine",
+     "cps": 32,
+     "at": 0.5
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,153 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#f3efe6}</style></head>
+<body><div id="root"></div>
+<script>
+window.W = 1080; window.H = 1350; window.FPS = 30; window.END = 18;
+window.FONT = "Charter,'Charter BT',Georgia,serif"; window.BG = '#f3efe6';
+window.POST = { grain: 0.02, ca: 0.8, vig: 0.12, bloom: 0 };
+</script>
+<script src="../../engine/comp.js"></script><script src="../../engine/moves.js"></script><script src="../../engine/fx.js"></script>
+<script src="spec.js"></script><script src="beats.js"></script><script src="data.js"></script><script src="../../engine/engine.js"></script>
+<script>
+// reel-engine showreel: six scenes on a 120 BPM grid. One paper world, soft shadows, and a paper tag that prints each
+// scene's own spec from project.json. The chart in scene 3 is this soundtrack's measured loudness (data.js) and its beats.
+const PAPER = '#f3efe6', INK = '#161513', INK2 = '#4a4741', MUTED = '#7d786e', RULE = '#cfc8b8', RULE2 = '#e2dccf', OR = '#d9730d', BAR = '#b9b2a3', CARD = '#fbf8f2';
+const f1 = v => (+v).toFixed(1), f2 = v => (+v).toFixed(2);
+const hs = (i, s) => { const x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453; return x - Math.floor(x); };
+const MONO = 'style="font-family:Menlo,Monaco,monospace"';
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const mono = (x, y, size, str, fill = INK, anchor = 'start', w = 400, extra = '') => `<text x="${x}" y="${y}" font-size="${size}" font-weight="${w}" fill="${fill}" text-anchor="${anchor}" ${MONO} xml:space="preserve" ${extra}>${str}</text>`;
+const serif = (x, y, size, str, fill = INK, anchor = 'middle', w = 700, extra = '') => `<text x="${x}" y="${y}" font-size="${size}" font-weight="${w}" fill="${fill}" text-anchor="${anchor}" ${extra}>${str}</text>`;
+const paper = (c = PAPER) => `<rect x="-2500" y="-2500" width="6080" height="6350" fill="${c}"/>`;
+const B = k => BEATS[k];
+const WIN = [[0, B(4)], [B(4), B(10)], [B(10), B(16)], [B(16), B(22)], [B(22), B(28)], [B(28), 18.0]];
+const lt = (t, i) => t - WIN[i][0];
+
+// ---------- S1: "Motion, / written as code." The words land on the beats; the full stop is an orange dot the camera flies through
+const L2 = 'written as code', S1 = 112, X2 = fxMeasure(L2, S1, 700), W2 = X2[X2.length - 1], X0 = 540 - (W2 + 40) / 2, DOT = [X0 + W2 + 22, 716];
+const WORDS = [[0, 'written'], [8, 'as'], [11, 'code']];   // [char offset, word]
+function hook(t) { const u = lt(t, 0);
+  let s = serif(540, 560, 150, 'Motion,', INK, 'middle', 700);
+  WORDS.forEach(([o, w], k) => { const at = B(k) - 0.18, e = ob((u - at) / 0.32), x = X0 + X2[o];
+    if (u < at) return;
+    s += `<g opacity="${f2(Math.min(1, (u - at) / 0.12))}" transform="translate(${f1(x)} 716) scale(${f2(0.6 + 0.4 * e)}) translate(${f1(-x)} -716)">${serif(f1(x), 716, S1, w.trim(), k === 2 ? OR : INK, 'start', 700)}</g>`; });
+  return s; }
+function codeRain(t) { const CODE = ['"cam": { "move": "dolly in" }', '"cut": "zoom through"', 'renderFrame(i, K)', 'layers: { sky, bg, mid, fg }', '"fx": [{ "fx": "pop-in" }]', 'comp.add(src, 1 / K)'];
+  let s = ''; for (let k = 0; k < 26; k++) s += mono(f1(-200 + hs(k, 2) * 1300), f1(140 + k * 46 - (t * 18) % 46), 24, esc(CODE[k % CODE.length]), RULE, 'start', 400, `opacity="${f2(0.5 + 0.5 * hs(k, 3))}"`);
+  return s; }
+
+// ---------- S2: dusk in paper layers
+function hill(y0, amp, freq, ph, col, sh = true) { let d = `M -1800 ${y0}`;
+  for (let x = -1800; x <= 2900; x += 36) d += ` L ${x} ${f1(y0 - amp * (0.62 * Math.sin(x * freq + ph) + 0.38 * Math.sin(x * freq * 2.3 + ph * 1.7)))}`;
+  d += ' L 2900 3400 L -1800 3400 Z'; return `<path d="${d}" fill="${col}"${sh ? ' filter="url(#sh)"' : ''}/>`; }
+function trees(y0, n, seed, col = INK) { let s = '';
+  for (let k = 0; k < n; k++) { const x = -1600 + k * (4400 / n) + 70 * hs(k, seed), h = 80 + 80 * hs(k, seed + 1), y = y0 - 26 * hs(k, seed + 2);
+    s += `<path d="M ${f1(x)} ${f1(y - h)} L ${f1(x + h * 0.3)} ${f1(y)} L ${f1(x - h * 0.3)} ${f1(y)} Z" fill="${col}"/>`; }
+  return s; }
+function birds(t) { let s = ''; for (let k = 0; k < 5; k++) { const x = 160 + k * 70 + 60 * t + 20 * Math.sin(k), y = 420 + 26 * hs(k, 6) + 6 * Math.sin(t * 4 + k), w = 14 + 4 * Math.sin(t * 9 + k);
+  s += `<path d="M ${f1(x - 16)} ${f1(y - w * 0.4)} Q ${f1(x - 6)} ${f1(y - 2)} ${f1(x)} ${f1(y + 3)} Q ${f1(x + 6)} ${f1(y - 2)} ${f1(x + 16)} ${f1(y - w * 0.4)}" stroke="${INK}" stroke-width="4" fill="none" stroke-linecap="round"/>`; }
+  return s; }
+const SUN = [790, 300, 105];
+function clouds(t) { return [[180, 250, 1], [620, 470, 0.8], [980, 200, 1.1]].map(([x, y, s], k) => { const dx = 14 * t;
+  return `<g transform="translate(${f1(x + dx)} ${y}) scale(${s})" filter="url(#sh)"><rect x="-120" y="-26" width="240" height="52" rx="26" fill="${CARD}"/><circle cx="-30" cy="-30" r="44" fill="${CARD}"/><circle cx="34" cy="-22" r="34" fill="${CARD}"/></g>`; }).join(''); }
+
+// ---------- S3: the soundtrack, measured
+const PX0 = 150, PX1 = 930, PY0 = 760, PY1 = 1040;
+function envPath() { return 'M ' + ENV.map((v, i) => `${f1(PX0 + (PX1 - PX0) * i / (ENV.length - 1))} ${f1(PY1 - (PY1 - PY0) * v)}`).join(' L '); }
+const BT8 = BEATS.filter(b => b < ENV_DUR);
+function chart(t) {
+  let s = `<rect x="90" y="560" width="900" height="560" rx="22" fill="${CARD}" filter="url(#sh)"/>` +
+    serif(150, 640, 44, 'This soundtrack, measured', INK, 'start') + mono(150, 686, 24, 'loudness, first 8 s   |   orange = beats', MUTED);
+  s += `<rect x="${PX0}" y="${PY1}" width="${PX1 - PX0}" height="3" fill="${INK}"/>`;
+  s += fxEl('ticks', { x: PX0, y: PY0 - 20, w: PX1 - PX0, h: PY1 - PY0 + 20 }, F => BT8.map((b, i) => { const it = (F.stagger && F.stagger.items[i]) || { sy: 0, op: 0 }, x = PX0 + (PX1 - PX0) * b / ENV_DUR, h = (PY1 - PY0 + 20) * Math.max(0, it.sy);
+    return `<rect x="${f1(x - 2)}" y="${f1(PY1 - h)}" width="4" height="${f1(h)}" fill="${OR}" opacity="${f2(0.75 * it.op)}"/>`; }).join(''), BT8.length);
+  s += fxEl('env', { x: PX0, y: PY0, w: PX1 - PX0, h: PY1 - PY0 }, F => F['line draw'] ? `<path d="${envPath()}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${f2(1 - F['line draw'].draw)}" fill="none" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>` : '');
+  return s; }
+function badge(t) { const [x, y, r] = SUN;
+  return `<circle cx="${x}" cy="${y}" r="${r}" fill="${OR}" filter="url(#sh)"/>` + fxEl('badge', { x: x - r, y: y - r, w: 2 * r, h: 2 * r }, F =>
+    mono(x, y + 14, 60, F['count-up'] ? F['count-up'].text : '0', PAPER, 'middle', 700) + mono(x, y + 52, 22, 'BPM', PAPER, 'middle', 700)) +
+    serif(120, 290, 64, 'Cuts land', INK, 'start') + serif(120, 366, 64, 'on the beat.', INK, 'start'); }
+
+// ---------- S4: six element fx at once
+const TILES = [[90, 170], [560, 170], [90, 500], [560, 500], [90, 830], [560, 830]], TW = 430, TH = 300;
+const NAMES = ['pop-in', 'shape morph', 'typewriter', 'count-up', 'line draw', 'particles'];
+function tile(i, F, inner) { const [x, y] = TILES[i], it = (F.stagger && F.stagger.items[i]) || { s: 0, op: 0 }, cx = x + TW / 2, cy = y + TH / 2;
+  return `<g opacity="${f2(it.op)}" transform="translate(${cx} ${cy}) scale(${f2(Math.max(0, it.s))}) translate(${-cx} ${-cy})"><rect x="${x}" y="${y}" width="${TW}" height="${TH}" rx="20" fill="${CARD}" filter="url(#sh)"/>` +
+    inner + mono(x + 26, y + TH - 26, 24, NAMES[i], MUTED, 'start', 700) + `</g>`; }
+function grid(t) { const u = lt(t, 3);
+  return fxEl('tiles', { x: 90, y: 170, w: 900, h: 960 }, F => TILES.map(([x, y], i) => { const cx = x + TW / 2, cy = y + TH / 2 - 22;
+    const c = [
+      () => fxEl('c1', { x: cx - 70, y: cy - 70, w: 140, h: 140 }, () => `<circle cx="${cx}" cy="${cy}" r="70" fill="${OR}"/>`),
+      () => fxEl('c2', { x: cx - 80, y: cy - 80, w: 160, h: 160 }, G => G['shape morph'] ? `<g transform="translate(${cx} ${cy}) rotate(${f1(G['shape morph'].rot)})"><path d="${fxPath(G['shape morph'].pts, 0, 0, 80)}" fill="${INK}"/></g>` : `<circle cx="${cx}" cy="${cy}" r="80" fill="${INK}"/>`),
+      () => fxEl('c3', { x: cx - 150, y: cy - 40, w: 300, h: 80 }, G => { const n = G.typewriter ? G.typewriter.chars : 0, str = 'hello'.slice(0, n), x0 = cx - 5 * 38.4 / 2;
+        return mono(f1(x0), cy + 22, 64, str, INK, 'start', 700) + (Math.floor(u * 3) % 2 || n < 5 ? `<rect x="${f1(x0 + n * 38.5 + 4)}" y="${cy - 26}" width="8" height="56" fill="${OR}"/>` : ''); }),
+      () => fxEl('c4', { x: cx - 120, y: cy - 60, w: 240, h: 120 }, G => mono(cx, cy + 34, 104, G['count-up'] ? G['count-up'].text : '0', OR, 'middle', 700)),
+      () => fxEl('c5', { x: cx - 150, y: cy - 60, w: 300, h: 120 }, G => G['line draw'] ? `<path d="M ${cx - 150} ${cy + 30} C ${cx - 100} ${cy - 90} ${cx - 50} ${cy + 90} ${cx} ${cy} S ${cx + 100} ${cy - 80} ${cx + 150} ${cy - 30}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${f2(1 - G['line draw'].draw)}" fill="none" stroke="${OR}" stroke-width="12" stroke-linecap="round"/>` : ''),
+      () => fxEl('c6', { x: cx - 40, y: cy - 40, w: 80, h: 80 }, () => `<path d="${fxPath(EFX.shapePts('star'), cx, cy, 44)}" fill="${OR}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>`),
+    ][i];
+    return tile(i, F, c()); }).join(''), 6); }
+
+// ---------- S5: the spec of this very scene, typed
+const JSON_TXT = SPEC.scenes[4].fx[0].text;
+function colourise(line) { return esc(line).replace(/("[^"]*")(\s*:)?/g, (m, str, colon) => colon ? `<tspan fill="${INK}">${str}</tspan><tspan fill="${MUTED}">${colon}</tspan>` : `<tspan fill="${OR}">${str}</tspan>`); }
+function specCard(t) {
+  let s = `<rect x="50" y="380" width="980" height="520" rx="22" fill="${CARD}" filter="url(#sh)"/><rect x="50" y="380" width="980" height="70" rx="22" fill="${RULE2}"/><rect x="50" y="420" width="980" height="30" fill="${RULE2}"/>` +
+    mono(90, 426, 26, 'project.json  /  scene 5', INK2, 'start', 700);
+  s += fxEl('json', { x: 110, y: 470, w: 860, h: 400 }, F => { let left = F.typewriter ? F.typewriter.chars : 0, out = '';
+    JSON_TXT.split('\n').forEach((line, k) => { const shown = line.slice(0, Math.max(0, left)); left -= line.length + 1;
+      out += `<text x="90" y="${520 + k * 64}" font-size="28" ${MONO} xml:space="preserve" fill="${MUTED}">${colourise(shown)}</text>`; });
+    return out; });
+  return s + serif(540, 300, 56, 'You write this.', INK) + `<g opacity="${f2(sm((lt(t, 4) - 1.6) / 0.4))}">${serif(540, 1010, 56, 'You get the scene.', OR)}</g>`; }
+function filmStrip(t) { const off = -(t * 140) % 240; let s = `<rect x="-1500" y="1080" width="4100" height="200" fill="${INK}"/>`;
+  for (let k = -8; k < 18; k++) { const x = off + k * 240; s += `<rect x="${f1(x + 20)}" y="1112" width="200" height="136" rx="6" fill="${k % 3 ? RULE2 : PAPER}"/><circle cx="${f1(x + 120)}" cy="1180" r="${k % 2 ? 30 : 42}" fill="${OR}" opacity="${k % 3 ? 0.9 : 0.5}"/>` +
+    `<rect x="${f1(x + 30)}" y="1088" width="22" height="14" rx="3" fill="${PAPER}"/><rect x="${f1(x + 150)}" y="1088" width="22" height="14" rx="3" fill="${PAPER}"/><rect x="${f1(x + 30)}" y="1258" width="22" height="14" rx="3" fill="${PAPER}"/><rect x="${f1(x + 150)}" y="1258" width="22" height="14" rx="3" fill="${PAPER}"/>`; }
+  return s; }
+
+const SC = [
+  { a: WIN[0][0], b: WIN[0][1], anchors: { dot: { layer: 'mid', x: DOT[0], y: DOT[1] - 14, r: 16 } }, layers: {
+    sky: t => paper(),
+    bg: t => codeRain(t),
+    mid: t => hook(t) + fxEl('dot', { x: DOT[0] - 16, y: DOT[1] - 30, w: 32, h: 32 }, () => `<circle cx="${DOT[0]}" cy="${DOT[1] - 14}" r="16" fill="${OR}"/>`),
+  } },
+  { a: WIN[1][0], b: WIN[1][1], anchors: { sun: { layer: 'sky', x: SUN[0], y: SUN[1], r: SUN[2] } }, layers: {
+    sky: t => paper('url(#dusk)') + `<circle cx="${SUN[0]}" cy="${SUN[1]}" r="${SUN[2] * 1.9}" fill="${OR}" opacity="0.08"/><circle cx="${SUN[0]}" cy="${SUN[1]}" r="${SUN[2] * 1.45}" fill="${OR}" opacity="0.12"/><circle cx="${SUN[0]}" cy="${SUN[1]}" r="${SUN[2]}" fill="${OR}"/>`,
+    bg: t => clouds(t) + hill(820, 130, 0.0019, 0.4, RULE2) + birds(lt(t, 1)),
+    mid: t => hill(960, 100, 0.0029, 2.1, RULE) + trees(930, 22, 3, BAR) + hill(1050, 70, 0.0037, 5.2, BAR),
+    fg: t => hill(1190, 56, 0.0046, 4.0, INK2) + trees(1186, 30, 5, INK),
+  } },
+  { a: WIN[2][0], b: WIN[2][1], anchors: { badge: { layer: 'mid', x: SUN[0], y: SUN[1], r: SUN[2] }, card: { layer: 'mid', x: 540, y: 840, r: 450 } }, layers: {
+    sky: t => paper() + Array.from({ length: 34 }, (_, k) => `<line x1="-1500" y1="${k * 80 - 700}" x2="2600" y2="${k * 80 - 700}" stroke="${RULE2}" stroke-width="2"/>`).join(''),
+    mid: t => badge(t) + chart(t),
+  } },
+  { a: WIN[3][0], b: WIN[3][1], layers: { sky: t => paper(), mid: t => grid(t) } },
+  { a: WIN[4][0], b: WIN[4][1], anchors: { card: { layer: 'mid', x: 540, y: 640, r: 470 } }, layers: {
+    sky: t => paper(),
+    bg: t => filmStrip(t),
+    mid: t => specCard(t),
+  } },
+  { a: WIN[5][0], b: WIN[5][1], anchors: { title: { layer: 'mid', x: 540, y: 600, r: 320 } }, layers: {
+    sky: t => paper() + `<circle cx="540" cy="600" r="420" fill="${RULE2}"/><circle cx="540" cy="600" r="300" fill="${PAPER}"/>`,
+    mid: t => fxEl('title', { x: 140, y: 490, w: 800, h: 150 }, () => serif(540, 640, 140, 'reel-engine', INK)) +
+      fxEl('url', { x: 140, y: 690, w: 800, h: 56 }, F => { const str = 'github.com/WolfurX/reel-engine', n = F.typewriter ? F.typewriter.chars : 0;
+        return mono(f1(540 - str.length * 21.68 / 2), 734, 36, str.slice(0, n), OR, 'start', 700); }) +
+      `<g opacity="${f2(sm((lt(t, 5) - 1.5) / 0.45))}">${serif(540, 840, 38, 'Open source, MIT.', INK2, 'middle', 400)}${serif(540, 892, 38, 'Ships as a Claude Code skill.', INK2, 'middle', 400)}</g>`,
+  } },
+];
+
+const DEFS = `<defs>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="10"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <linearGradient id="dusk" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="1350"><stop offset="0.35" stop-color="${PAPER}"/><stop offset="0.62" stop-color="#f4d9bd"/><stop offset="1" stop-color="#eec7a0"/></linearGradient>
+</defs>`;
+// masthead + a paper tag that drops in with each scene and prints that scene's spec
+const names = v => (v === undefined || v === null ? [] : [].concat(v)).map(m => typeof m === 'string' ? m : (m.move || m.fx || m.name));
+function specLines(i) { const s = SPEC.scenes[i] || {}, L = [`cam  ${names(s.cam).join(' + ')}`];
+  const fx = [...new Set(names(s.fx))]; if (fx.length) L.push(`fx   ${fx.length > 3 ? fx.slice(0, 3).join(', ') + ` +${fx.length - 3}` : fx.join(', ')}`);
+  if (s.cut) L.push(`cut  ${names(s.cut)[0]}`); return L; }
+function OVERLAY(t) {
+  let s = mono(64, 74, 30, '&#x20BF; WOLFUR', INK, 'start', 700) + mono(1016, 74, 22, 'REEL-ENGINE', MUTED, 'end', 700) + `<rect x="64" y="94" width="952" height="3" fill="${INK}"/>`;
+  const i = Math.max(0, WIN.findIndex(([a, b]) => t >= a && t < b)), u = t - WIN[i][0], L = specLines(i), w = Math.max(...L.map(l => l.length)) * 15.65 + 56, h = 30 + L.length * 36;
+  const e = ob(u / 0.4), sw = 2.5 * Math.sin(u * 5) * Math.exp(-u * 1.6), y = 1316 - h + (1 - e) * 60;
+  s += `<g opacity="${f2(Math.min(1, u / 0.15))}" transform="rotate(${f2(sw)} 64 ${f1(y)})"><rect x="64" y="${f1(y)}" width="${f1(w)}" height="${h}" rx="12" fill="${CARD}" filter="url(#sh)"/>` +
+    `<circle cx="${f1(64 + w - 26)}" cy="${f1(y + 24)}" r="7" fill="${PAPER}" stroke="${RULE}" stroke-width="2"/>` +
+    L.map((l, k) => `<text x="88" y="${f1(y + 46 + k * 36)}" font-size="26" ${MONO} xml:space="preserve"><tspan fill="${MUTED}">${l.slice(0, 5)}</tspan><tspan fill="${k === L.length - 1 && l.startsWith('cut') ? OR : INK}" font-weight="700">${esc(l.slice(5))}</tspan></text>`).join('') + '</g>';
+  return s; }
+</script></body></html>

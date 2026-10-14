@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#0E1024}</style></head>
+<body><div id="root"></div>
+<script>window.W = 1920; window.H = 1080; window.FPS = 30; window.END = 8;</script>
+<script src="../../engine/comp.js"></script><script src="../../engine/moves.js"></script><script src="../../engine/fx.js"></script>
+<script src="spec.js"></script><script src="../../engine/engine.js"></script>
+<script>
+// A four-scene demo: every scene is a set of depth layers drawn as SVG strings, a pure function of time t (seconds).
+// Camera moves, cuts and element fx come by NAME from project.json "scenes" (written to spec.js by tools/build.py).
+const f1 = v => (+v).toFixed(1), f2 = v => (+v).toFixed(2);
+const hs = (i, s) => { const x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453; return x - Math.floor(x); };   // seeded noise, no Math.random
+function dots(t, n, seed, col, op = 0.6) { let s = '';
+  for (let k = 0; k < n; k++) { const x = (hs(k, seed) * 2400 - 240 + 30 * t * (0.5 + hs(k, seed + 2))) % 2400 - 240, y = hs(k, seed + 1) * 1080;
+    s += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(3 + 7 * hs(k, seed + 3))}" fill="${col}" opacity="${f2(op * (0.4 + 0.6 * Math.abs(Math.sin(t * 1.5 + k))))}"/>`; }
+  return s; }
+const bigBg = (id) => `<rect x="-2000" y="-1500" width="5920" height="4080" fill="url(#${id})"/>`;
+
+const SC = [
+  { a: 0, b: 2.0, anchors: { title: { layer: 'mid', x: 960, y: 540, r: 300 } }, layers: {
+    sky: t => bigBg('gSky1'),
+    bg: t => `<circle cx="420" cy="300" r="260" fill="${C.purple}" opacity="0.35" filter="url(#bigBlur)"/><circle cx="1520" cy="820" r="320" fill="${C.teal}" opacity="0.28" filter="url(#bigBlur)"/>`,
+    mid: t => fxEl('title', { x: 560, y: 440, w: 800, h: 140 }, F => fxText(F, 'REEL ENGINE', 960, 560, 132, `font-weight="900" fill="${C.white}"`)) +
+      `<rect x="760" y="610" width="${f1(400 * oc((t - 1.0) / 0.5))}" height="10" rx="5" fill="${C.yellow}"/>`,
+    fg: t => dots(t, 24, 3, C.white, 0.5),
+  } },
+  { a: 2.0, b: 4.0, anchors: { ring: { layer: 'mid', x: 1440, y: 540, r: 150 } }, layers: {
+    sky: t => bigBg('gSky2'),
+    bg: t => Array.from({ length: 16 }, (_, k) => `<rect x="${k * 150 - 200}" y="${f1(760 - 260 * hs(k, 9))}" width="90" height="900" rx="12" fill="${C.navy}"/>`).join(''),
+    mid: t => fxEl('num', { x: 260, y: 330, w: 760, h: 260 }, F => `<text x="640" y="560" font-size="250" font-weight="900" fill="${C.yellow}" text-anchor="middle">${F['count-up'] ? F['count-up'].text : '0'}</text>`) +
+      fxEl('label', { x: 340, y: 610, w: 600, h: 70 }, () => t > 2.85 ? `<text x="640" y="660" font-size="50" font-weight="800" fill="${C.white}" text-anchor="middle">frames, all deterministic</text>` : '') +
+      `<circle cx="1440" cy="540" r="150" fill="none" stroke="${C.coral}" stroke-width="28"/><circle cx="1440" cy="540" r="${f1(60 + 10 * Math.sin(t * 6))}" fill="${C.coral}"/>`,
+    fg: t => dots(t, 16, 7, C.yellow, 0.35),
+  } },
+  { a: 4.0, b: 6.0, anchors: { card: { layer: 'mid', x: 960, y: 540, r: 320 } }, layers: {
+    sky: t => bigBg('gSky3'),
+    mid: t => fxEl('card', { x: 660, y: 290, w: 600, h: 500, rx: 40 }, () =>
+      `<rect x="660" y="290" width="600" height="500" rx="40" fill="${C.white}"/>` +
+      `<circle cx="820" cy="450" r="80" fill="${C.coral}"/><rect x="940" y="390" width="250" height="34" rx="17" fill="${C.ink}"/>` +
+      `<rect x="940" y="450" width="190" height="24" rx="12" fill="#9AA0C0"/><rect x="740" y="590" width="440" height="24" rx="12" fill="#C9CCE0"/>` +
+      `<rect x="740" y="640" width="360" height="24" rx="12" fill="#C9CCE0"/><rect x="740" y="690" width="400" height="24" rx="12" fill="#C9CCE0"/>`),
+    fg: t => dots(t, 14, 11, C.teal, 0.45),
+  } },
+  { a: 6.0, b: 8.0, anchors: { end: { layer: 'mid', x: 960, y: 520, r: 200 } }, layers: {
+    sky: t => bigBg('gSky4'),
+    mid: t => fxEl('end', { x: 760, y: 320, w: 400, h: 400 }, () =>
+      `<circle cx="960" cy="520" r="200" fill="${C.yellow}"/><path d="M 900 420 L 1060 520 L 900 620 Z" fill="${C.ink}"/>`) +
+      `<text x="960" y="860" font-size="64" font-weight="800" fill="${C.white}" text-anchor="middle" opacity="${f2(sm((t - 6.5) / 0.4))}">motion, written as code</text>`,
+  } },
+];
+
+const DEFS = `<defs>
+  <linearGradient id="gSky1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C2150"/><stop offset="1" stop-color="#0E1024"/></linearGradient>
+  <linearGradient id="gSky2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A1F5C"/><stop offset="1" stop-color="#12142E"/></linearGradient>
+  <radialGradient id="gSky3" cx="0.5" cy="0.5" r="0.7"><stop offset="0" stop-color="#2EC4B6"/><stop offset="1" stop-color="#0B3B44"/></radialGradient>
+  <radialGradient id="gSky4" cx="0.5" cy="0.45" r="0.75"><stop offset="0" stop-color="#3A2E8A"/><stop offset="1" stop-color="#0E1024"/></radialGradient>
+</defs>`;
+const CAPTIONS = [[0.3, 1.7, 'every frame is a function of time']];
+</script></body></html>

@@ -1,0 +1,32 @@
+{
+  "name": "demo",
+  "w": 1920, "h": 1080, "fps": 30, "dur": 8,
+  "cuts": [2.0, 4.0, 6.0],
+  "scenes": [
+    {
+      "cam": {"move": "dolly in", "amount": 0.18, "subject": "title", "ease": "inOut"},
+      "fx": [{"fx": "typewriter", "target": "title", "text": "REEL ENGINE", "cps": 14, "at": 0.1}],
+      "cut": {"name": "whip pan", "dir": "left"}
+    },
+    {
+      "cam": {"move": "tracking shot", "dir": "left", "amount": 1.6, "ease": "inOut"},
+      "fx": [
+        {"fx": "count-up", "target": "num", "from": 0, "to": 240, "dur": 1.1, "at": 0.15},
+        {"fx": "pop-in", "target": "label", "at": 0.85, "strength": "strong"}
+      ],
+      "cut": {"name": "zoom through", "into": "ring"}
+    },
+    {
+      "cam": {"move": "orbit", "amount": 40, "subject": "card", "ease": "inOut"},
+      "fx": [{"fx": "light sweep", "target": "card", "at": 0.7, "dur": 0.8}],
+      "cut": "glitch"
+    },
+    {
+      "cam": {"move": "dolly in", "amount": 0.1, "subject": "end", "ease": "out"},
+      "fx": [
+        {"fx": "pop-in", "target": "end", "at": 0.0, "strength": "strong"},
+        {"fx": "particles", "target": "end", "at": 0.12}
+      ]
+    }
+  ]
+}

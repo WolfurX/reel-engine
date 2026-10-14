@@ -1,0 +1,12 @@
+# build products (examples/demo/demo.mp4 is kept on purpose)
+frames/
+preview/
+spec.js
+beats.js
+beats.json
+sfx.wav
+mix.wav
+duck.json
+render-w*.log
+__pycache__/
+.DS_Store

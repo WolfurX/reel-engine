@@ -36,6 +36,7 @@ orbiting card. Its music was generated with Google Lyria; everything else, sound
 ```sh
 pip install numpy pillow playwright      # plus ffmpeg, and Chrome/Chromium (or: playwright install chromium)
 python3 tools/build.py examples/demo --preview    # a few frames -> examples/demo/preview/contact.png
+python3 tools/qc.py examples/demo                 # text vs the safe box, then the MP4; exit 1 on a failure
 python3 tools/build.py examples/demo              # full render -> examples/demo/demo.mp4
 ```
 
@@ -67,6 +68,7 @@ music ──beats.py──► beats.js ───────┘        │  K su
 | `tools/beats.py` | tempo and phase of the music, cuts snapped to the beat |
 | `tools/sfxlib.py` | synthesised sound effects |
 | `tools/contact.py` | contact sheet of chosen frames |
+| `tools/qc.py` | checks without eyeballing every frame: text inside the safe box (rendered with and without text, the difference is where text lands), then the MP4's duration, black and frozen stretches, loudness; `preview/qc.png` + `qc.json` |
 | `docs/` | [scenes](docs/scenes.md), [camera moves and cuts](docs/moves.md), [element fx](docs/fx.md) |
 
 ## project.json

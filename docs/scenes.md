@@ -30,7 +30,7 @@ snapped to the beat); load it before your scene script to time hits and scene wi
 | `PALETTE` | built-in | overrides `C.yellow`, `C.coral`, `C.teal`, `C.purple`, `C.white`, `C.ink`, `C.navy`, `C.green`, `C.gold` |
 | `FONT` | Inter, Helvetica Neue, Arial | CSS font-family for all text |
 | `BG` | `#000` | colour behind everything |
-| `SAFE` | 6% / 7% margins | the box where text must read on every player: `{x0, y0, x1, y1, cx}` |
+| `SAFE` | 6% / 7% margins | the box where text must read on every player: `{x0, y0, x1, y1, cx}`; `tools/qc.py` checks it (decoration meant to sit outside: `data-noqc="1"` on its `<text>`) |
 | `POST` | `{grain: 0.025, ca: 2.2, vig: 0.18, bloom: 0.55}` | the post pass: film grain, chromatic aberration (px), vignette, bloom |
 
 ## A scene

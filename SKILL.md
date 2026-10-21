@@ -18,10 +18,14 @@ transitions, the element animation, motion blur, post and the encode. Everything
 3. **Preview:** `python3 tools/build.py <project> --preview`, then LOOK at `<project>/preview/contact.png`. Check every
    frame: text inside the safe box, nothing cropped by a camera move, every cut reads, the subject is where the camera
    expects it.
-4. **Fix and preview again** until the contact sheet is right. Rendering the whole piece to discover a layout bug is slow.
+   Then `python3 tools/qc.py <project>`: it finds where text really lands on those frames (camera moves included) and fails
+   when any leaves the safe box; `<project>/preview/qc.png` marks the safe box and each text box. Read that one image and
+   the printed FAIL / WARN lines, not every frame. `--platform tiktok` checks against the TikTok / Reels / Shorts UI.
+4. **Fix and preview again** until the contact sheet and qc are right. Rendering the whole piece to discover a layout bug is slow.
 5. **Build:** `python3 tools/build.py <project>` (steps `spec beats frames sfx mix`, resumable with `--from STEP`).
    Output: `<project>/<name>.mp4`.
-6. **Watch the result** (or extract stills with ffmpeg) before calling it done.
+6. **Check the result:** `python3 tools/qc.py <project>` again now also checks the MP4 (duration, black or frozen stretches,
+   loudness). Then watch it, or extract stills with ffmpeg, before calling it done.
 
 Set `REEL_PY` to the Python that has Playwright if it is not the one running `build.py`.
 

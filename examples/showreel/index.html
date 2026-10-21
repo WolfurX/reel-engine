@@ -32,7 +32,7 @@ function hook(t) { const u = lt(t, 0);
     s += `<g opacity="${f2(Math.min(1, (u - at) / 0.12))}" transform="translate(${f1(x)} 716) scale(${f2(0.6 + 0.4 * e)}) translate(${f1(-x)} -716)">${serif(f1(x), 716, S1, w.trim(), k === 2 ? OR : INK, 'start', 700)}</g>`; });
   return s; }
 function codeRain(t) { const CODE = ['"cam": { "move": "dolly in" }', '"cut": "zoom through"', 'renderFrame(i, K)', 'layers: { sky, bg, mid, fg }', '"fx": [{ "fx": "pop-in" }]', 'comp.add(src, 1 / K)'];
-  let s = ''; for (let k = 0; k < 26; k++) s += mono(f1(-200 + hs(k, 2) * 1300), f1(140 + k * 46 - (t * 18) % 46), 24, esc(CODE[k % CODE.length]), RULE, 'start', 400, `opacity="${f2(0.5 + 0.5 * hs(k, 3))}"`);
+  let s = ''; for (let k = 0; k < 26; k++) s += mono(f1(-200 + hs(k, 2) * 1300), f1(140 + k * 46 - (t * 18) % 46), 24, esc(CODE[k % CODE.length]), RULE, 'start', 400, `opacity="${f2(0.5 + 0.5 * hs(k, 3))}" data-noqc="1"`);
   return s; }
 
 // ---------- S2: dusk in paper layers
@@ -143,11 +143,11 @@ function specLines(i) { const s = SPEC.scenes[i] || {}, L = [`cam  ${names(s.cam
   const fx = [...new Set(names(s.fx))]; if (fx.length) L.push(`fx   ${fx.length > 3 ? fx.slice(0, 3).join(', ') + ` +${fx.length - 3}` : fx.join(', ')}`);
   if (s.cut) L.push(`cut  ${names(s.cut)[0]}`); return L; }
 function OVERLAY(t) {
-  let s = mono(64, 74, 30, '&#x20BF; WOLFUR', INK, 'start', 700) + mono(1016, 74, 22, 'REEL-ENGINE', MUTED, 'end', 700) + `<rect x="64" y="94" width="952" height="3" fill="${INK}"/>`;
+  let s = mono(64, 74, 30, '&#x20BF; WOLFUR', INK, 'start', 700, 'data-noqc="1"') + mono(1016, 74, 22, 'REEL-ENGINE', MUTED, 'end', 700, 'data-noqc="1"') + `<rect x="64" y="94" width="952" height="3" fill="${INK}"/>`;
   const i = Math.max(0, WIN.findIndex(([a, b]) => t >= a && t < b)), u = t - WIN[i][0], L = specLines(i), w = Math.max(...L.map(l => l.length)) * 15.65 + 56, h = 30 + L.length * 36;
   const e = ob(u / 0.4), sw = 2.5 * Math.sin(u * 5) * Math.exp(-u * 1.6), y = 1316 - h + (1 - e) * 60;
   s += `<g opacity="${f2(Math.min(1, u / 0.15))}" transform="rotate(${f2(sw)} 64 ${f1(y)})"><rect x="64" y="${f1(y)}" width="${f1(w)}" height="${h}" rx="12" fill="${CARD}" filter="url(#sh)"/>` +
     `<circle cx="${f1(64 + w - 26)}" cy="${f1(y + 24)}" r="7" fill="${PAPER}" stroke="${RULE}" stroke-width="2"/>` +
-    L.map((l, k) => `<text x="88" y="${f1(y + 46 + k * 36)}" font-size="26" ${MONO} xml:space="preserve"><tspan fill="${MUTED}">${l.slice(0, 5)}</tspan><tspan fill="${k === L.length - 1 && l.startsWith('cut') ? OR : INK}" font-weight="700">${esc(l.slice(5))}</tspan></text>`).join('') + '</g>';
+    L.map((l, k) => `<text x="88" y="${f1(y + 46 + k * 36)}" font-size="26" ${MONO} xml:space="preserve" data-noqc="1"><tspan fill="${MUTED}">${l.slice(0, 5)}</tspan><tspan fill="${k === L.length - 1 && l.startsWith('cut') ? OR : INK}" font-weight="700">${esc(l.slice(5))}</tspan></text>`).join('') + '</g>';
   return s; }
 </script></body></html>

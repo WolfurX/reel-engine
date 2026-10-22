@@ -10,9 +10,11 @@ and the text box (yellow, red when out). Text drawn as paths is not seen. Decora
 purpose (a masthead, background type) carries data-noqc="1" on its <text> and is skipped.
 Safe box: the page's SAFE (6% / 7% margins unless the page sets one). --platform tiktok uses the TikTok / Reels / Shorts UI
 zones of a vertical frame (left 60, top 130, right 140, bottom 484 px at 1080x1920, scaled). --safe takes frame fractions.
-Video (when <project>/<name>.mp4 exists): duration within 0.1 s of "dur"; no black stretch of 0.25 s or more (warning
-only when it touches the last 0.5 s, a fade-out); frozen stretches of 1.5 s or more are warnings; integrated loudness is
-reported (build.py mixes to -14 LUFS, outside -16..-12 is a warning).
+Video (when <project>/<name>.mp4 exists): exactly NF = round(dur * fps) decoded frames; when the project has audio (music,
+voice or sfx.py) an audio track whose stream lasts NF / fps s within one AAC frame (1024 / 48000 s), its loudness reported
+(build.py mixes to -14 LUFS, outside -16..-12 is a warning); a silent project (none of the three) needs no audio track and
+gets no loudness check. No black stretch of 0.25 s or more (warning only when it touches the last 0.5 s, a fade-out);
+frozen stretches of 1.5 s or more are warnings.
 Writes <project>/preview/qc.json. Run it with the Python that has Playwright (REEL_PY), like render.py."""
 import sys, os, io, re, json, base64, subprocess, pathlib
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
@@ -22,7 +24,7 @@ opt = lambda k, d: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
 EP = pathlib.Path(args[0]).resolve()
 cfg = json.load(open(EP / 'project.json')); name = cfg.get('name', EP.name)
 W, H, FPS = int(cfg.get('w', 1080)), int(cfg.get('h', 1920)), int(cfg.get('fps', 30))
-DUR = float(cfg.get('dur', 10)); K = int(opt('--K', 2))
+DUR = float(cfg.get('dur', 10)); K = int(opt('--K', 2)); NF = round(DUR * FPS)
 CANDIDATES = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/Applications/Chromium.app/Contents/MacOS/Chromium',
               '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser']
 CHROME = os.environ.get('CHROME') or next((c for c in CANDIDATES if os.path.exists(c)), None)
@@ -115,21 +117,28 @@ def sheet(rows, S):
 def video_check():
     mp4 = EP / f'{name}.mp4'
     if '--no-video' in sys.argv or not mp4.exists(): return None
-    probe = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration:stream=codec_type', '-of', 'json', str(mp4)],
+    probe = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-count_frames', '-show_entries',
+                                       'format=duration:stream=codec_type,nb_read_frames,duration', '-of', 'json', str(mp4)],
                                       capture_output=True, text=True).stdout)
-    dur = float(probe['format']['duration']); audio = any(s.get('codec_type') == 'audio' for s in probe.get('streams', []))
+    st = probe.get('streams', []); dur = float(probe['format']['duration'])
+    nf = int(next((s.get('nb_read_frames', 0) for s in st if s.get('codec_type') == 'video'), 0))
+    audio = next((s for s in st if s.get('codec_type') == 'audio'), None); adur = float(audio['duration']) if audio else None
+    want_audio = bool(cfg.get('music') or cfg.get('voice') or (EP / 'sfx.py').exists())   # else silent by design
     cmd = ['ffmpeg', '-hide_banner', '-nostats', '-i', str(mp4), '-vf', 'blackdetect=d=0.25:pix_th=0.10,freezedetect=n=-60dB:d=1.5']
-    log = subprocess.run(cmd + (['-af', 'ebur128=framelog=quiet'] if audio else ['-an']) + ['-f', 'null', '-'], capture_output=True, text=True).stderr
+    log = subprocess.run(cmd + (['-af', 'ebur128=framelog=quiet'] if audio and want_audio else ['-an']) + ['-f', 'null', '-'],
+                         capture_output=True, text=True).stderr
     black = [(float(a), float(b)) for a, b in re.findall(r'black_start:([\d.]+) black_end:([\d.]+)', log)]
     freeze = [float(v) for v in re.findall(r'freeze_start: ([\d.]+)', log)]
     lufs = re.findall(r'I:\s+(-?[\d.]+) LUFS', log); lufs = float(lufs[-1]) if lufs else None
-    if abs(dur - DUR) > 0.1: fails.append(f'duration {dur:.2f}s, project.json says {DUR:g}s')
+    if nf != NF: fails.append(f'{nf} video frames, project.json says {NF} ({DUR:g}s x {FPS} fps)')
+    if want_audio and not audio: fails.append('no audio track, but the project has music / voice / sfx.py')
+    if audio and not want_audio: warns.append('audio track in a silent project (no music, voice or sfx.py)')
+    if audio and abs(adur - NF / FPS) > 1024 / 48000: fails.append(f'audio stream {adur:.3f}s, the video is {NF / FPS:.3f}s')
     for a, b in black:
         (warns if b >= dur - 0.5 else fails).append(f'black {a:.2f}-{b:.2f}s' + (' (fade-out?)' if b >= dur - 0.5 else ''))
     for a in freeze: warns.append(f'frozen picture from {a:.2f}s for 1.5 s or more')
-    if not audio: warns.append('no audio track')
-    elif lufs is not None and not -16 <= lufs <= -12: warns.append(f'loudness {lufs} LUFS (build.py mixes to -14)')
-    return {'file': mp4.name, 'duration_s': round(dur, 3), 'black': black, 'frozen_from': freeze, 'lufs': lufs}
+    if lufs is not None and not -16 <= lufs <= -12: warns.append(f'loudness {lufs} LUFS (build.py mixes to -14)')
+    return {'file': mp4.name, 'duration_s': round(dur, 3), 'frames': nf, 'audio_s': adur, 'black': black, 'frozen_from': freeze, 'lufs': lufs}
 
 
 if __name__ == '__main__':
@@ -138,7 +147,7 @@ if __name__ == '__main__':
            'frames': [{k: v for k, v in r.items() if k != 'img'} for r in rows], 'video': video, 'fail': fails, 'warn': warns}
     (EP / 'preview/qc.json').write_text(json.dumps(rep, indent=1))
     print(f"text: {len(rows)} frames, {sum(r['out'] for r in rows)} out of the safe box ({S['from']})")
-    if video: print(f"video: {video['duration_s']}s, {len(video['black'])} black, {len(video['frozen_from'])} frozen, {video['lufs']} LUFS")
+    if video: print(f"video: {video['frames']} frames, {video['duration_s']}s, {len(video['black'])} black, {len(video['frozen_from'])} frozen, {video['lufs']} LUFS")
     for w in warns: print('WARN', w)
     for f in fails: print('FAIL', f)
     print('qc', 'FAIL' if fails else 'ok', '->', EP / 'preview/qc.png')

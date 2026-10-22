@@ -43,6 +43,9 @@ python3 tools/build.py examples/demo              # full render -> examples/demo
 About 0.6 s per 1080p frame with 2 workers on a 2015 laptop; `--workers` and `--K` (subframes, default 6) trade speed
 for smoothness.
 
+A/V contract: the MP4 has exactly `round(dur * fps)` frames and a mix exactly as long, a voice still sounding past the end
+fails the build, and `qc.py` checks both; `python3 tests/test_av_contract.py` runs the regression matrix (ffmpeg, no browser).
+
 ## How it works
 
 ```
